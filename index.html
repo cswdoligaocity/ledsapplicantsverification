@@ -382,10 +382,11 @@ textarea{min-height:85px;resize:vertical}
 <div class="head"><div class="eyebrow">APPLICANT VERIFICATION</div><h2>Check your registration record</h2><p>Enter your application information. The details must match one applicant record before information is displayed.</p></div>
 <form id="lookupForm">
 <div class="grid">
-<div class="field"><label>Last Name</label><input class="name" id="lastName" required></div>
-<div class="field"><label>First Name</label><input class="name" id="firstName" required></div>
-<div class="field"><label>Middle Name <span class="opt">(blank if none)</span></label><input class="name" id="middleName"></div>
-<div class="field"><label>Extension <span class="opt">(blank if none)</span></label><input class="name" id="extension"></div>
+<div class="field"><label>Last Name</label><input class="name" id="lastName" required autocomplete="family-name" spellcheck="false" maxlength="100"></div>
+<div class="field"><label>First Name</label><input class="name" id="firstName" required autocomplete="given-name" spellcheck="false" maxlength="100"></div>
+<div class="field"><label>Middle Name <span class="opt">(blank if none)</span></label><input class="name" id="middleName" autocomplete="additional-name" spellcheck="false" maxlength="100"></div>
+<div class="field"><label>Extension <span class="opt">(blank if none)</span></label><input class="name" id="extension" spellcheck="false" maxlength="30"></div>
+<div class="field full"><div style="font-size:12px;color:#6d7872;background:#f4f8f6;border:1px solid #dce7e1;border-radius:9px;padding:9px 11px"><strong style="color:#07552f">Name entry:</strong> Special characters such as <strong>.</strong>, <strong>-</strong>, <strong>Ñ</strong>/<strong>ñ</strong>, and apostrophes are allowed. Please enter the name exactly as recorded.</div></div>
 <div class="field"><label>Year Level</label><select id="yearLevel" required><option value="">Select year level</option><option value="1ST">1st Year</option><option value="2ND">2nd Year</option><option value="3RD">3rd Year</option><option value="4TH">4th Year</option><option value="5TH">5th Year</option></select></div>
 <div class="field"><label>Barangay</label><select id="barangay" required><option value="">Select barangay</option><option value="ABELLA">ABELLA</option>
 <option value="ALLANG">ALLANG</option>
@@ -537,7 +538,19 @@ const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
 const $=id=>document.getElementById(id);
 let current=null;
 
-function clean(v){return (v||"").trim().replace(/\s+/g," ")}
+// Preserve punctuation and Unicode characters in names (e.g. PEÑA, SANTOS-DELA CRUZ, O'CONNOR).
+["lastName","firstName","middleName","extension"].forEach(id=>{
+  $(id).addEventListener("input", e=>{
+    const start=e.target.selectionStart;
+    const end=e.target.selectionEnd;
+    e.target.value=e.target.value.normalize("NFC");
+    try{e.target.setSelectionRange(start,end)}catch(_){ }
+  });
+});
+
+function clean(v){
+  return String(v ?? "").normalize("NFC").trim().replace(/\s+/g," ");
+}
 function display(v,fallback="None / Not indicated"){return v==null||clean(String(v))===""?fallback:v}
 function showMsg(t,type="error"){$("msg").className="msg "+type;$("msg").textContent=t;$("msg").scrollIntoView({behavior:"smooth",block:"nearest"})}
 function closeModal(){$("modal").classList.remove("show");$("accountPanel").classList.remove("show");$("generalPanel").classList.remove("show");document.body.style.overflow=""}
