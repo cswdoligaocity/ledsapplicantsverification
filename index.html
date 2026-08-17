@@ -395,6 +395,12 @@ textarea{min-height:85px;resize:vertical}
 <div class="head"><div class="eyebrow">APPLICANT VERIFICATION</div><h2>Check your registration record</h2><p>Enter your application information. The details must match one applicant record before information is displayed.</p></div>
 <form id="lookupForm">
 <div class="grid">
+
+  <div class="field"><label>Last Name</label><input class="name" id="lastName" required autocomplete="family-name" spellcheck="false" maxlength="100" pattern="[A-Za-z]*" title="English letters A-Z only."></div>
+<div class="field"><label>First Name</label><input class="name" id="firstName" required autocomplete="given-name" spellcheck="false" maxlength="100" pattern="[A-Za-z]*" title="English letters A-Z only."></div>
+<div class="field"><label>Middle Name <span class="opt">(blank if none)</span></label><input class="name" id="middleName" autocomplete="additional-name" spellcheck="false" maxlength="100" pattern="[A-Za-z]*" title="English letters A-Z only."></div>
+<div class="field"><label>Extension <span class="opt">(blank if none)</span></label><input class="name" id="extension" spellcheck="false" maxlength="30" pattern="[A-Za-z]*" title="English letters A-Z only."></div>
+<div class="field full"><div style="font-size:12px;color:#6d7872;background:#f4f8f6;border:1px solid #dce7e1;border-radius:9px;padding:9px 11px"><strong style="color:#07552f">Note:</strong> This form does not accept special characters like spaces, periods (.), hyphens (-), apostrophes ('), and Ñ/ñ. This only accept english letter A-Z.</div></div>
 <div class="field"><label>Year Level</label><select id="yearLevel" required><option value="">Select year level</option><option value="1ST">1st Year</option><option value="2ND">2nd Year</option><option value="3RD">3rd Year</option><option value="4TH">4th Year</option><option value="5TH">5th Year</option></select></div>
 <div class="field"><label>Barangay</label><select id="barangay" required><option value="">Select barangay</option><option value="ABELLA">ABELLA</option>
 <option value="ALLANG">ALLANG</option>
@@ -454,7 +460,7 @@ textarea{min-height:85px;resize:vertical}
 </div>
 <div class="actions"><button id="checkBtn" class="primary">CHECK MY RECORD</button></div>
 </form>
-<div id="msg" class="msg"></div>
+
 <div class="notice"><strong>Important:</strong> The LandBank account number shown after a successful match is the account number currently encoded in the LEDS database. Please verify it carefully. A correction or new account submission is sent for staff review and does not automatically overwrite the official record.</div>
 </section>
 <footer class="site-footer">
@@ -491,7 +497,7 @@ textarea{min-height:85px;resize:vertical}
 <div id="accountBox" class="rec account">
 <span>LANDBANK ACCOUNT NUMBER</span>
 <strong id="rAccount">—</strong>
-<div id="rAccountStatus" class="account-status"></div>
+
 </div>
 
 <div class="rec full"><span>LANDBANK REFERENCE NUMBER</span><strong id="rReference">—</strong></div>
@@ -640,6 +646,20 @@ $("cancelGeneralBtn").onclick=()=>$("generalPanel").classList.remove("show");
 $("closeBtn").onclick=closeModal;
 $("modal").onclick=e=>{if(e.target===$("modal"))closeModal()};
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal()});
+</script>
+
+<script>
+function allowEnglishLettersOnly(input) {
+  input.value = input.value.replace(/[^A-Za-z]/g, '');
+}
+document.querySelectorAll('.name').forEach(function(input) {
+  input.addEventListener('input', function() {
+    allowEnglishLettersOnly(input);
+  });
+  input.addEventListener('paste', function() {
+    setTimeout(function() { allowEnglishLettersOnly(input); }, 0);
+  });
+});
 </script>
 </body>
 </html>
