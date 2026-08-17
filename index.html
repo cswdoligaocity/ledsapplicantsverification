@@ -38,16 +38,16 @@ button,input,select,textarea{font:inherit}
     radial-gradient(circle at 20% 20%, rgba(255,255,255,.05), transparent 28%),
     linear-gradient(145deg,#063f25 0%,#07552f 45%,#0b6b3c 100%);
   color:#fff;
-  min-height:380px;
-  padding:26px 20px 84px;
+  min-height:285px;
+  padding:18px 16px 58px;
   text-align:center;
 }
 .hero::before{
   content:"";
   position:absolute;
-  inset:auto -8% 35px -8%;
-  height:72px;
-  border-top:14px solid var(--gold);
+  inset:auto -8% 27px -8%;
+  height:48px;
+  border-top:9px solid var(--gold);
   border-radius:50% 50% 0 0;
   transform:rotate(-1deg);
   opacity:.98;
@@ -57,30 +57,32 @@ button,input,select,textarea{font:inherit}
   position:absolute;
   left:-8%;
   right:-8%;
-  bottom:-35px;
-  height:115px;
+  bottom:-31px;
+  height:78px;
   background:#f7f9f8;
   border-radius:50% 50% 0 0/100% 100% 0 0;
 }
 .hero-inner{
   position:relative;
   z-index:2;
-  width:min(900px,100%);
+  width:min(720px,100%);
   margin:0 auto;
 }
 .hero-logo{
   display:block;
-  width:min(760px,88vw);
-  max-height:300px;
+  width:min(520px,82vw);
+  height:auto;
+  max-height:245px;
   object-fit:contain;
+  object-position:center;
   margin:0 auto;
-  border-radius:16px;
+  border-radius:12px;
 }
 .page{
   position:relative;
   z-index:4;
-  width:min(880px,calc(100% - 28px));
-  margin:-26px auto 0;
+  width:min(760px,calc(100% - 28px));
+  margin:-20px auto 0;
   padding-bottom:44px;
 }
 .card{
@@ -136,6 +138,17 @@ form{padding:24px 26px 26px}
 label{
   font-size:13px;
   font-weight:800;
+}
+.name-note{
+  grid-column:1/-1;
+  margin-top:-5px;
+  margin-bottom:-3px;
+  padding:9px 11px;
+  border-radius:9px;
+  background:#f2f8f4;
+  color:#587066;
+  font-size:11px;
+  line-height:1.4;
 }
 .opt{font-weight:500;color:#8b948f}
 input,select,textarea{
@@ -357,8 +370,8 @@ textarea{min-height:85px;resize:vertical}
 @keyframes s{to{transform:rotate(360deg)}}
 
 @media(max-width:700px){
-  .hero{min-height:300px;padding:18px 10px 68px}
-  .hero-logo{width:min(94vw,700px);max-height:220px}
+  .hero{min-height:220px;padding:12px 8px 48px}
+  .hero-logo{width:min(82vw,430px);max-height:180px}
   .page{width:min(100% - 18px,880px);margin:-18px auto 0}
   .grid,.records,.footer-grid{grid-template-columns:1fr}
   .full,.account{grid-column:auto}
@@ -382,7 +395,8 @@ textarea{min-height:85px;resize:vertical}
 <div class="head"><div class="eyebrow">APPLICANT VERIFICATION</div><h2>Check your registration record</h2><p>Enter your application information. The details must match one applicant record before information is displayed.</p></div>
 <form id="lookupForm">
 <div class="grid">
-<div class="field"><label>Last Name</label><input class="name" id="lastName" required autocomplete="family-name" spellcheck="false" maxlength="100"></div>
+<div class="name-note">Names may include spaces, periods (.), hyphens (-), apostrophes (&#39;), and Ñ/ñ.</div>
+  <div class="field"><label>Last Name</label><input class="name" id="lastName" required autocomplete="family-name" spellcheck="false" maxlength="100"></div>
 <div class="field"><label>First Name</label><input class="name" id="firstName" required autocomplete="given-name" spellcheck="false" maxlength="100"></div>
 <div class="field"><label>Middle Name <span class="opt">(blank if none)</span></label><input class="name" id="middleName" autocomplete="additional-name" spellcheck="false" maxlength="100"></div>
 <div class="field"><label>Extension <span class="opt">(blank if none)</span></label><input class="name" id="extension" spellcheck="false" maxlength="30"></div>
