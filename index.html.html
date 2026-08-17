@@ -1,0 +1,665 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LEDS Online Registration Verification</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+:root{
+  --green:#07552f;
+  --green-2:#0b6b3c;
+  --green-3:#13824d;
+  --gold:#f0c928;
+  --ink:#17211d;
+  --muted:#6d7872;
+  --line:#d9e3de;
+  --soft:#f5f8f6;
+  --white:#ffffff;
+  --danger:#b42318;
+  --ok:#087443;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  color:var(--ink);
+  background:#f7f9f8;
+  min-height:100vh;
+}
+button,input,select,textarea{font:inherit}
+
+.hero{
+  position:relative;
+  overflow:hidden;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(255,255,255,.05), transparent 28%),
+    linear-gradient(145deg,#063f25 0%,#07552f 45%,#0b6b3c 100%);
+  color:#fff;
+  min-height:285px;
+  padding:18px 16px 58px;
+  text-align:center;
+}
+.hero::before{
+  content:"";
+  position:absolute;
+  inset:auto -8% 27px -8%;
+  height:48px;
+  border-top:9px solid var(--gold);
+  border-radius:50% 50% 0 0;
+  transform:rotate(-1deg);
+  opacity:.98;
+}
+.hero::after{
+  content:"";
+  position:absolute;
+  left:-8%;
+  right:-8%;
+  bottom:-31px;
+  height:78px;
+  background:#f7f9f8;
+  border-radius:50% 50% 0 0/100% 100% 0 0;
+}
+.hero-inner{
+  position:relative;
+  z-index:2;
+  width:min(720px,100%);
+  margin:0 auto;
+}
+.hero-logo{
+  display:block;
+  width:min(520px,82vw);
+  height:auto;
+  max-height:245px;
+  object-fit:contain;
+  object-position:center;
+  margin:0 auto;
+  border-radius:12px;
+}
+.page{
+  position:relative;
+  z-index:4;
+  width:min(760px,calc(100% - 28px));
+  margin:-20px auto 0;
+  padding-bottom:44px;
+}
+.card{
+  background:#fff;
+  border:1px solid rgba(217,227,222,.95);
+  border-radius:18px;
+  box-shadow:0 20px 60px rgba(8,67,38,.12);
+  overflow:hidden;
+}
+.head{
+  padding:26px 26px 20px;
+  text-align:center;
+  border-bottom:1px solid var(--line);
+}
+.eyebrow{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  font-size:12px;
+  font-weight:900;
+  letter-spacing:.08em;
+  color:var(--green-3);
+  text-transform:uppercase;
+}
+.eyebrow::before{
+  content:"👥";
+  font-size:14px;
+}
+.head h2{
+  margin:7px 0 6px;
+  font-size:clamp(24px,3vw,31px);
+  line-height:1.15;
+}
+.head p{
+  margin:0 auto;
+  max-width:690px;
+  color:var(--muted);
+  font-size:14px;
+  line-height:1.55;
+}
+form{padding:24px 26px 26px}
+.grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:17px 18px;
+}
+.field{
+  display:flex;
+  flex-direction:column;
+  gap:7px;
+}
+label{
+  font-size:13px;
+  font-weight:800;
+}
+.name-note{
+  grid-column:1/-1;
+  margin-top:-5px;
+  margin-bottom:-3px;
+  padding:9px 11px;
+  border-radius:9px;
+  background:#f2f8f4;
+  color:#587066;
+  font-size:11px;
+  line-height:1.4;
+}
+.opt{font-weight:500;color:#8b948f}
+input,select,textarea{
+  width:100%;
+  border:1px solid #cfd9d4;
+  border-radius:11px;
+  background:#fff;
+  color:var(--ink);
+  padding:12px 13px;
+  outline:none;
+  transition:.18s ease;
+}
+input:focus,select:focus,textarea:focus{
+  border-color:var(--green-3);
+  box-shadow:0 0 0 4px rgba(19,130,77,.10);
+}
+input.name{text-transform:uppercase}
+.full{grid-column:1/-1}
+.actions{
+  display:flex;
+  gap:10px;
+  margin-top:22px;
+  flex-wrap:wrap;
+}
+button{
+  border:0;
+  border-radius:11px;
+  padding:13px 17px;
+  font-size:14px;
+  font-weight:850;
+  cursor:pointer;
+  transition:.18s ease;
+}
+button:disabled{opacity:.55;cursor:not-allowed}
+.primary{
+  flex:1;
+  background:linear-gradient(90deg,var(--green),var(--green-2));
+  color:#fff;
+}
+.primary:hover:not(:disabled){
+  transform:translateY(-1px);
+  box-shadow:0 8px 22px rgba(7,85,47,.20);
+}
+.secondary{background:#eef3f1;color:#28352f}
+.warn{background:#fff1f0;color:var(--danger)}
+
+.notice,.msg{
+  margin:0 26px 26px;
+  padding:14px 16px;
+  border-radius:11px;
+  font-size:13px;
+  line-height:1.55;
+}
+.notice{
+  background:#f0faf4;
+  border:1px solid #cfe8d8;
+  border-left:4px solid #27a75e;
+  color:#415148;
+}
+.notice strong{color:#1d4d33}
+.msg{display:none}
+.msg.error{display:block;background:#fff1f0;color:var(--danger)}
+.msg.success{display:block;background:#edf9f2;color:var(--ok)}
+
+.site-footer{
+  margin-top:24px;
+  background:linear-gradient(90deg,#07552f,#0b6b3c);
+  color:#fff;
+  border-radius:14px;
+  padding:20px 22px 16px;
+  box-shadow:0 16px 40px rgba(7,85,47,.12);
+}
+.footer-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:18px;
+}
+.footer-item{
+  display:flex;
+  gap:10px;
+  align-items:flex-start;
+}
+.footer-icon{
+  width:34px;height:34px;
+  border-radius:9px;
+  display:grid;place-items:center;
+  background:rgba(240,201,40,.13);
+  color:var(--gold);
+  flex:none;
+  font-size:18px;
+}
+.footer-item strong{
+  display:block;
+  font-size:13px;
+  margin-bottom:2px;
+}
+.footer-item span{
+  display:block;
+  color:rgba(255,255,255,.75);
+  font-size:12px;
+}
+.copyright{
+  margin-top:16px;
+  padding-top:14px;
+  border-top:1px solid rgba(255,255,255,.2);
+  text-align:center;
+  color:rgba(255,255,255,.80);
+  font-size:12px;
+}
+
+.backdrop{
+  position:fixed;
+  inset:0;
+  background:rgba(8,24,18,.64);
+  backdrop-filter:blur(4px);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:18px;
+  z-index:50;
+}
+.backdrop.show{display:flex}
+.modal{
+  width:min(730px,100%);
+  max-height:92vh;
+  overflow:auto;
+  background:#fff;
+  border-radius:20px;
+  box-shadow:0 30px 90px rgba(0,0,0,.30);
+}
+.mhead{
+  display:flex;
+  gap:13px;
+  padding:22px 24px 18px;
+  border-bottom:1px solid var(--line);
+}
+.check{
+  width:42px;height:42px;
+  border-radius:12px;
+  background:#edf9f2;
+  color:var(--ok);
+  display:grid;place-items:center;
+  font-size:21px;font-weight:900;
+  flex:none;
+}
+.mhead h3{margin:0 0 4px;font-size:21px}
+.mhead p{margin:0;color:var(--muted);font-size:13px;line-height:1.45}
+.mbody{padding:20px 24px}
+.records{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:11px;
+}
+.rec{
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:12px 14px;
+  background:#fcfdfc;
+}
+.rec span{
+  display:block;
+  font-size:10px;
+  letter-spacing:.08em;
+  font-weight:900;
+  color:var(--muted);
+  margin-bottom:4px;
+}
+.rec strong{
+  font-size:14px;
+  word-break:break-word;
+}
+.account{
+  grid-column:1/-1;
+  border:2px solid #cfe7dc;
+  background:#f4fbf7;
+  padding:16px;
+}
+.account strong{
+  font-size:20px;
+  letter-spacing:.035em;
+}
+.account.none{
+  border-color:#efd9a5;
+  background:#fffaf0;
+}
+.account-status{
+  margin-top:8px;
+  font-size:12px;
+  color:var(--muted);
+  font-weight:650;
+}
+.mbuttons,.lbp-actions{
+  padding:0 24px 23px;
+  display:flex;
+  gap:9px;
+  flex-wrap:wrap;
+}
+.mbuttons button,.lbp-actions button{flex:1 1 200px}
+.panel{
+  display:none;
+  border-top:1px solid var(--line);
+  padding:20px 24px 24px;
+  background:#fbfdfc;
+}
+.panel.show{display:block}
+.panel h4{margin:0 0 7px}
+.panel p{margin:0 0 15px;color:var(--muted);font-size:13px}
+textarea{min-height:85px;resize:vertical}
+.spinner{
+  width:15px;height:15px;
+  border:2px solid rgba(255,255,255,.4);
+  border-top-color:#fff;
+  border-radius:50%;
+  display:inline-block;
+  vertical-align:-2px;
+  margin-right:7px;
+  animation:s .7s linear infinite;
+}
+@keyframes s{to{transform:rotate(360deg)}}
+
+@media(max-width:700px){
+  .hero{min-height:220px;padding:12px 8px 48px}
+  .hero-logo{width:min(82vw,430px);max-height:180px}
+  .page{width:min(100% - 18px,880px);margin:-18px auto 0}
+  .grid,.records,.footer-grid{grid-template-columns:1fr}
+  .full,.account{grid-column:auto}
+  .head,form{padding-left:18px;padding-right:18px}
+  .notice,.msg{margin-left:18px;margin-right:18px}
+  .mhead,.mbody,.mbuttons,.lbp-actions,.panel{padding-left:18px;padding-right:18px}
+  .site-footer{border-radius:12px}
+}
+</style>
+
+</head>
+<body>
+<section class="hero">
+  <div class="hero-inner">
+    <img src="LEDS LOGO.png" alt="City Government of Ligao - Ligao Educational Scholarship" class="hero-logo">
+  </div>
+</section>
+
+<main class="page">
+<section class="card">
+<div class="head"><div class="eyebrow">APPLICANT VERIFICATION</div><h2>Check your registration record</h2><p>Enter your application information. The details must match one applicant record before information is displayed.</p></div>
+<form id="lookupForm">
+<div class="grid">
+
+  <div class="field"><label>Last Name</label><input class="name" id="lastName" required autocomplete="family-name" spellcheck="false" maxlength="100" pattern="[A-Za-z ]*" title="English letters A-Z and spaces only."></div>
+<div class="field"><label>First Name</label><input class="name" id="firstName" required autocomplete="given-name" spellcheck="false" maxlength="100" pattern="[A-Za-z ]*" title="English letters A-Z and spaces only."></div>
+<div class="field"><label>Middle Name <span class="opt">(blank if none)</span></label><input class="name" id="middleName" autocomplete="additional-name" spellcheck="false" maxlength="100" pattern="[A-Za-z ]*" title="English letters A-Z and spaces only."></div>
+<div class="field"><label>Extension <span class="opt">(blank if none)</span></label><input class="name" id="extension" spellcheck="false" maxlength="30" pattern="[A-Za-z ]*" title="English letters A-Z and spaces only."></div>
+<div class="field full"><div style="font-size:12px;color:#6d7872;background:#f4f8f6;border:1px solid #dce7e1;border-radius:9px;padding:9px 11px"><strong style="color:#07552f">Note:</strong> This form does not accept special characters like periods (.), hyphens (-), apostrophes ('), and Ñ/ñ. Spaces are accepted. This only accept English letters A-Z.</div></div>
+<div class="field"><label>Year Level</label><select id="yearLevel" required><option value="">Select year level</option><option value="1ST">1st Year</option><option value="2ND">2nd Year</option><option value="3RD">3rd Year</option><option value="4TH">4th Year</option><option value="5TH">5th Year</option></select></div>
+<div class="field"><label>Barangay</label><select id="barangay" required><option value="">Select barangay</option><option value="ABELLA">ABELLA</option>
+<option value="ALLANG">ALLANG</option>
+<option value="AMTIC">AMTIC</option>
+<option value="BACONG">BACONG</option>
+<option value="BAGUMBAYAN">BAGUMBAYAN</option>
+<option value="BALANAC">BALANAC</option>
+<option value="BALIGANG">BALIGANG</option>
+<option value="BARAYONG">BARAYONG</option>
+<option value="BASAG">BASAG</option>
+<option value="BATANG">BATANG</option>
+<option value="BAY">BAY</option>
+<option value="BINANOWAN">BINANOWAN</option>
+<option value="BINATAGAN">BINATAGAN</option>
+<option value="BOBONSURAN">BOBONSURAN</option>
+<option value="BONGA">BONGA</option>
+<option value="BUSAC">BUSAC</option>
+<option value="BUSAY">BUSAY</option>
+<option value="CABARIAN">CABARIAN</option>
+<option value="CALZADA">CALZADA</option>
+<option value="CATBURAWAN">CATBURAWAN</option>
+<option value="CAVASI">CAVASI</option>
+<option value="CULLIAT">CULLIAT</option>
+<option value="DUNAO">DUNAO</option>
+<option value="FRANCIA">FRANCIA</option>
+<option value="GUILID">GUILID</option>
+<option value="HERRERA">HERRERA</option>
+<option value="LAYON">LAYON</option>
+<option value="MACALIDONG">MACALIDONG</option>
+<option value="MAHABA">MAHABA</option>
+<option value="MALAMA">MALAMA</option>
+<option value="MAONON">MAONON</option>
+<option value="NABONTON">NABONTON</option>
+<option value="NASISI">NASISI</option>
+<option value="OMA-OMA">OMA-OMA</option>
+<option value="PALAPAS">PALAPAS</option>
+<option value="PANDAN">PANDAN</option>
+<option value="PAULBA">PAULBA</option>
+<option value="PAULOG">PAULOG</option>
+<option value="PINAMANIQUIAN">PINAMANIQUIAN</option>
+<option value="PINIT">PINIT</option>
+<option value="RANAO-RANAO">RANAO-RANAO</option>
+<option value="SAN VICENTE">SAN VICENTE</option>
+<option value="STA. CRUZ">STA. CRUZ</option>
+<option value="TAGPO">TAGPO</option>
+<option value="TAMBO">TAMBO</option>
+<option value="TANDARURA">TANDARURA</option>
+<option value="TASTAS">TASTAS</option>
+<option value="TINAGO">TINAGO</option>
+<option value="TINAMPO">TINAMPO</option>
+<option value="TIONGSON">TIONGSON</option>
+<option value="TOMOLIN">TOMOLIN</option>
+<option value="TUBURAN">TUBURAN</option>
+<option value="TULA-TULA GRANDE">TULA-TULA GRANDE</option>
+<option value="TULA-TULA PEQUEÑO">TULA-TULA PEQUEÑO</option>
+<option value="TUPAZ">TUPAZ</option></select></div>
+</div>
+<div class="actions"><button id="checkBtn" class="primary">CHECK MY RECORD</button></div>
+</form>
+
+<div class="notice"><strong>Important:</strong> The LandBank account number shown after a successful match is the account number currently encoded in the LEDS database. Please verify it carefully. A correction or new account submission is sent for staff review and does not automatically overwrite the official record.</div>
+</section>
+<footer class="site-footer">
+  <div class="footer-grid">
+    <div class="footer-item">
+      <div class="footer-icon">📍</div>
+      <div><strong>City Government of Ligao</strong><span>Ligao City, Albay</span></div>
+    </div>
+    <div class="footer-item">
+      <div class="footer-icon">🎓</div>
+      <div><strong>LEDS Program</strong><span>Ligao Educational Scholarship</span></div>
+    </div>
+    <div class="footer-item">
+      <div class="footer-icon">🛡</div>
+      <div><strong>Data Privacy</strong><span>For applicant verification use only</span></div>
+    </div>
+  </div>
+  <div class="copyright">© 2026 City Government of Ligao. All rights reserved.</div>
+</footer>
+</main>
+
+<div id="modal" class="backdrop">
+<div class="modal">
+<div class="mhead"><div class="check">✓</div><div><h3>Record Found</h3><p>Please review your information, especially your LandBank account details.</p></div></div>
+<div class="mbody">
+<div class="records">
+<div class="rec full"><span>FULL NAME</span><strong id="rName">—</strong></div>
+<div class="rec"><span>BARANGAY</span><strong id="rBarangay">—</strong></div>
+<div class="rec"><span>YEAR LEVEL</span><strong id="rYear">—</strong></div>
+<div class="rec full"><span>SCHOOL</span><strong id="rSchool">—</strong></div>
+<div class="rec"><span>APPLICANT TYPE</span><strong id="rType">—</strong></div>
+<div class="rec"><span>CONTACT NUMBER</span><strong id="rContact">—</strong></div>
+
+<div id="accountBox" class="rec account">
+<span>LANDBANK ACCOUNT NUMBER</span>
+<strong id="rAccount">—</strong>
+
+</div>
+
+<div class="rec full"><span>LANDBANK REFERENCE NUMBER</span><strong id="rReference">—</strong></div>
+<div class="rec"><span>GENERAL VERIFICATION STATUS</span><strong id="rStatus">—</strong></div>
+<div class="rec"><span>ACCOUNT VERIFICATION STATUS</span><strong id="rLbpStatus">—</strong></div>
+<div class="rec full"><span>OTHER GOVERNMENT SCHOLARSHIP</span><strong id="rScholarship">—</strong></div>
+<div class="rec full"><span>LACKING DOCUMENTS</span><strong id="rLacking">—</strong></div>
+</div>
+</div>
+
+<div id="lbpButtons" class="lbp-actions">
+<button id="verifyLbpBtn" class="primary" type="button">✓ ACCOUNT NUMBER IS CORRECT</button>
+<button id="changeLbpBtn" class="warn" type="button">REQUEST ACCOUNT NUMBER CORRECTION</button>
+</div>
+
+<div class="mbuttons">
+<button id="confirmBtn" class="secondary" type="button">✓ OTHER INFORMATION IS CORRECT</button>
+<button id="generalCorrectionBtn" class="secondary" type="button">REPORT OTHER INCORRECT INFORMATION</button>
+<button id="closeBtn" class="secondary" type="button">CLOSE</button>
+</div>
+
+<div id="accountPanel" class="panel">
+<h4 id="accountPanelTitle">LandBank Account Number</h4>
+<p id="accountPanelText"></p>
+<div class="grid">
+<div class="field full"><label>Correct / New LandBank Account Number</label><input id="newAccount" inputmode="numeric" maxlength="40" placeholder="Enter account number"></div>
+<div class="field full"><label>Confirm LandBank Account Number</label><input id="confirmAccount" inputmode="numeric" maxlength="40" placeholder="Re-enter account number"></div>
+<div class="field"><label>LandBank Reference Number <span class="opt">(optional)</span></label><input id="newReference" maxlength="60"></div>
+<div class="field"><label>Your Contact Number <span class="opt">(optional)</span></label><input id="requesterContact" inputmode="tel" maxlength="30"></div>
+<div class="field full"><label>Reason / Note <span class="opt">(optional)</span></label><textarea id="accountReason"></textarea></div>
+</div>
+<div class="actions"><button id="submitAccountBtn" class="primary" type="button">SUBMIT FOR REVIEW</button><button id="cancelAccountBtn" class="secondary" type="button">CANCEL</button></div>
+</div>
+
+<div id="generalPanel" class="panel">
+<h4>Request correction of other information</h4>
+<div class="grid">
+<div class="field"><label>Information to correct</label><select id="correctionField"><option value="">Select field</option><option value="full_name">Full Name</option><option value="barangay">Barangay</option><option value="school">School</option><option value="year_level">Year Level</option><option value="contact_number">Contact Number</option><option value="other_govt_scholarships">Other Government Scholarship</option><option value="lacking_documents">Lacking Documents</option><option value="applicant_type">Applicant Type</option></select></div>
+<div class="field"><label>Your Contact Number <span class="opt">(optional)</span></label><input id="generalContact" inputmode="tel"></div>
+<div class="field full"><label>Correct Information</label><textarea id="requestedInformation"></textarea></div>
+<div class="field full"><label>Reason <span class="opt">(optional)</span></label><textarea id="generalReason"></textarea></div>
+</div>
+<div class="actions"><button id="submitGeneralBtn" class="primary" type="button">SUBMIT CORRECTION REQUEST</button><button id="cancelGeneralBtn" class="secondary" type="button">CANCEL</button></div>
+</div>
+</div>
+</div>
+
+<script>
+const SUPABASE_URL="https://axsfrzlkohjwtoglnjpv.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY="sb_publishable_IspudY8hlt0BtIK6JLokkA_hKQHZZ1F";
+const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
+const $=id=>document.getElementById(id);
+let current=null;
+
+// Allow English letters A-Z and spaces only in name fields.
+["lastName","firstName","middleName","extension"].forEach(id=>{
+  $(id).addEventListener("input", e=>{
+    const start=e.target.selectionStart;
+    const end=e.target.selectionEnd;
+    e.target.value=e.target.value.normalize("NFC");
+    try{e.target.setSelectionRange(start,end)}catch(_){ }
+  });
+});
+
+function clean(v){
+  return String(v ?? "").normalize("NFC").trim().replace(/\s+/g," ");
+}
+function display(v,fallback="None / Not indicated"){return v==null||clean(String(v))===""?fallback:v}
+function showMsg(t,type="error"){$("msg").className="msg "+type;$("msg").textContent=t;$("msg").scrollIntoView({behavior:"smooth",block:"nearest"})}
+function closeModal(){$("modal").classList.remove("show");$("accountPanel").classList.remove("show");$("generalPanel").classList.remove("show");document.body.style.overflow=""}
+function year(v){return ({"1ST":"1st Year","2ND":"2nd Year","3RD":"3rd Year","4TH":"4th Year","5TH":"5th Year"}[String(v||"").toUpperCase()]||display(v))}
+
+$("lookupForm").addEventListener("submit",async e=>{
+ e.preventDefault(); $("msg").className="msg";
+ const p={p_last_name:clean($("lastName").value),p_first_name:clean($("firstName").value),p_middle_name:clean($("middleName").value),p_extension_name:clean($("extension").value),p_year_level:$("yearLevel").value,p_barangay:$("barangay").value};
+ const b=$("checkBtn"); b.disabled=true;b.innerHTML='<span class="spinner"></span>CHECKING...';
+ try{
+   const {data,error}=await db.rpc("lookup_leds_applicant",p); if(error)throw error;
+   if(!data||data.length===0){showMsg("No matching record was found. Please check all information and try again.");return}
+   if(data.length>1){showMsg("More than one record matched. For privacy, no record was displayed. Please contact the LEDS office.");return}
+   current=data[0];
+   $("rName").textContent=display(current.full_name); $("rBarangay").textContent=display(current.barangay); $("rYear").textContent=year(current.year_level);
+   $("rSchool").textContent=display(current.school); $("rType").textContent=display(current.applicant_type); $("rContact").textContent=display(current.masked_contact_number);
+   const has=!!clean(current.lbp_account_number||"");
+   $("rAccount").textContent=has?current.lbp_account_number:"NO ACCOUNT NUMBER ON RECORD";
+   $("rReference").textContent=display(current.lbp_reference_number,"NO REFERENCE NUMBER ON RECORD");
+   $("rStatus").textContent=display(current.verification_status); $("rLbpStatus").textContent=display(current.lbp_account_verification_status);
+   $("rScholarship").textContent=display(current.other_govt_scholarships); $("rLacking").textContent=display(current.lacking_documents);
+   $("accountBox").classList.toggle("none",!has);
+   $("verifyLbpBtn").style.display=has?"":"none";
+   $("changeLbpBtn").textContent=has?"REQUEST ACCOUNT NUMBER CORRECTION":"+ SUBMIT MY ACCOUNT NUMBER";
+   $("rAccountStatus").textContent=has?"Please compare this carefully with your actual LandBank account.":"If you already have a LandBank account, you may submit it below for staff review.";
+   $("modal").classList.add("show");document.body.style.overflow="hidden";
+ }catch(err){console.error(err);showMsg("The verification service could not be reached. Please try again.")}
+ finally{b.disabled=false;b.textContent="CHECK MY RECORD"}
+});
+
+$("verifyLbpBtn").onclick=async()=>{
+ if(!current?.public_id)return;
+ const b=$("verifyLbpBtn");b.disabled=true;b.innerHTML='<span class="spinner"></span>SAVING...';
+ try{const {data,error}=await db.rpc("confirm_leds_lbp_account",{p_public_id:current.public_id});if(error)throw error;if(!data)throw new Error("Not saved");
+ current.lbp_account_verification_status="VERIFIED";$("rLbpStatus").textContent="VERIFIED";b.textContent="✓ ACCOUNT NUMBER VERIFIED";alert("Your LandBank account number has been marked as VERIFIED.");}
+ catch(e){console.error(e);alert("Could not save the account verification. Please try again.");b.textContent="✓ ACCOUNT NUMBER IS CORRECT"}
+ finally{b.disabled=false}
+};
+
+$("changeLbpBtn").onclick=()=>{
+ const has=!!clean(current?.lbp_account_number||"");
+ $("accountPanelTitle").textContent=has?"Request LandBank Account Number Correction":"Submit Your LandBank Account Number";
+ $("accountPanelText").textContent=has?"Enter the correct account number below. Your existing record will remain unchanged until staff reviews the request.":"Enter your LandBank account number below. It will be submitted for staff review before being added to your official record.";
+ $("newAccount").value="";$("confirmAccount").value="";$("newReference").value=current?.lbp_reference_number||"";
+ $("accountPanel").classList.add("show");$("generalPanel").classList.remove("show");$("accountPanel").scrollIntoView({behavior:"smooth"});
+};
+
+$("submitAccountBtn").onclick=async()=>{
+ const a=clean($("newAccount").value),c=clean($("confirmAccount").value),ref=clean($("newReference").value);
+ if(!a){alert("Please enter your LandBank account number.");return} if(a!==c){alert("The two account numbers do not match.");return}
+ const b=$("submitAccountBtn");b.disabled=true;b.innerHTML='<span class="spinner"></span>SUBMITTING...';
+ try{
+   const {data,error}=await db.rpc("submit_leds_correction",{p_public_id:current.public_id,p_field_to_correct:"lbp_account_number",p_current_information:current.lbp_account_number||"",p_requested_information:a,p_reason:clean($("accountReason").value)||null,p_requester_contact:clean($("requesterContact").value)||null});
+   if(error)throw error;
+   if(ref && ref!==clean(current.lbp_reference_number||"")){
+      const r=await db.rpc("submit_leds_correction",{p_public_id:current.public_id,p_field_to_correct:"lbp_reference_number",p_current_information:current.lbp_reference_number||"",p_requested_information:ref,p_reason:"Submitted together with LandBank account request",p_requester_contact:clean($("requesterContact").value)||null});
+      if(r.error) console.error(r.error);
+   }
+   closeModal();showMsg("Your LandBank account request was submitted successfully. Request No. "+data+". It is pending staff review.","success");$("lookupForm").reset();
+ }catch(e){console.error(e);alert("Could not submit your account request. Please try again.")}
+ finally{b.disabled=false;b.textContent="SUBMIT FOR REVIEW"}
+};
+
+$("confirmBtn").onclick=async()=>{
+ if(!current?.public_id)return;
+ try{const {data,error}=await db.rpc("confirm_leds_information",{p_public_id:current.public_id});if(error)throw error;if(data){$("rStatus").textContent="VERIFIED";alert("Your other applicant information has been marked as VERIFIED.");}}
+ catch(e){console.error(e);alert("Could not save verification.")}
+};
+
+$("generalCorrectionBtn").onclick=()=>{$("generalPanel").classList.add("show");$("accountPanel").classList.remove("show");$("generalPanel").scrollIntoView({behavior:"smooth"})};
+$("submitGeneralBtn").onclick=async()=>{
+ const f=$("correctionField").value,requested=clean($("requestedInformation").value);if(!f||!requested){alert("Select a field and enter the correct information.");return}
+ const map={full_name:current.full_name,barangay:current.barangay,school:current.school,year_level:current.year_level,contact_number:current.masked_contact_number,other_govt_scholarships:current.other_govt_scholarships,lacking_documents:current.lacking_documents,applicant_type:current.applicant_type};
+ try{const {data,error}=await db.rpc("submit_leds_correction",{p_public_id:current.public_id,p_field_to_correct:f,p_current_information:String(map[f]??""),p_requested_information:requested,p_reason:clean($("generalReason").value)||null,p_requester_contact:clean($("generalContact").value)||null});if(error)throw error;closeModal();showMsg("Correction request submitted successfully. Request No. "+data+".","success");$("lookupForm").reset()}
+ catch(e){console.error(e);alert("Could not submit correction request.")}
+};
+$("cancelAccountBtn").onclick=()=>$("accountPanel").classList.remove("show");
+$("cancelGeneralBtn").onclick=()=>$("generalPanel").classList.remove("show");
+$("closeBtn").onclick=closeModal;
+$("modal").onclick=e=>{if(e.target===$("modal"))closeModal()};
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal()});
+</script>
+
+<script>
+function allowEnglishLettersOnly(input) {
+  input.value = input.value.replace(/[^A-Za-z ]/g, '');
+}
+document.querySelectorAll('.name').forEach(function(input) {
+  input.addEventListener('input', function() {
+    allowEnglishLettersOnly(input);
+  });
+  input.addEventListener('paste', function() {
+    setTimeout(function() { allowEnglishLettersOnly(input); }, 0);
+  });
+});
+</script>
+</body>
+</html>
