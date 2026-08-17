@@ -395,11 +395,11 @@ textarea{min-height:85px;resize:vertical}
 <div class="head"><div class="eyebrow">APPLICANT VERIFICATION</div><h2>Check your registration record</h2><p>Enter your application information. The details must match one applicant record before information is displayed.</p></div>
 <form id="lookupForm">
 <div class="grid">
-<div class="name-note">Names may include spaces, periods (.), hyphens (-), apostrophes (&#39;), and Ñ/ñ.</div>
-  <div class="field"><label>Last Name</label><input class="name" id="lastName" required autocomplete="family-name" spellcheck="false" maxlength="100"></div>
-<div class="field"><label>First Name</label><input class="name" id="firstName" required autocomplete="given-name" spellcheck="false" maxlength="100"></div>
-<div class="field"><label>Middle Name <span class="opt">(blank if none)</span></label><input class="name" id="middleName" autocomplete="additional-name" spellcheck="false" maxlength="100"></div>
-<div class="field"><label>Extension <span class="opt">(blank if none)</span></label><input class="name" id="extension" spellcheck="false" maxlength="30"></div>
+<div class="name-note"><strong>Name entry:</strong> Name fields accept English letters <strong>A-Z</strong> only. The following are not allowed: periods (.), hyphens (-), apostrophes ('), Ñ/ñ, spaces, accented letters, or other special/Unicode characters.</div>
+  <div class="field"><label>Last Name</label><input class="name" id="lastName" required autocomplete="family-name" spellcheck="false" maxlength="100" pattern="[A-Za-z]*" inputmode="text" autocomplete="off"></div>
+<div class="field"><label>First Name</label><input class="name" id="firstName" required autocomplete="given-name" spellcheck="false" maxlength="100" pattern="[A-Za-z]*" inputmode="text" autocomplete="off"></div>
+<div class="field"><label>Middle Name <span class="opt">(blank if none)</span></label><input class="name" id="middleName" autocomplete="additional-name" spellcheck="false" maxlength="100" pattern="[A-Za-z]*" inputmode="text" autocomplete="off"></div>
+<div class="field"><label>Extension <span class="opt">(blank if none)</span></label><input class="name" id="extension" spellcheck="false" maxlength="30" pattern="[A-Za-z]*" inputmode="text" autocomplete="off"></div>
 <div class="field full"><div style="font-size:12px;color:#6d7872;background:#f4f8f6;border:1px solid #dce7e1;border-radius:9px;padding:9px 11px"><strong style="color:#07552f">Name entry:</strong> Special characters such as <strong>.</strong>, <strong>-</strong>, <strong>Ñ</strong>/<strong>ñ</strong>, and apostrophes are allowed. Please enter the name exactly as recorded.</div></div>
 <div class="field"><label>Year Level</label><select id="yearLevel" required><option value="">Select year level</option><option value="1ST">1st Year</option><option value="2ND">2nd Year</option><option value="3RD">3rd Year</option><option value="4TH">4th Year</option><option value="5TH">5th Year</option></select></div>
 <div class="field"><label>Barangay</label><select id="barangay" required><option value="">Select barangay</option><option value="ABELLA">ABELLA</option>
@@ -552,13 +552,24 @@ const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
 const $=id=>document.getElementById(id);
 let current=null;
 
-// Preserve punctuation and Unicode characters in names (e.g. PEÑA, SANTOS-DELA CRUZ, O'CONNOR).
+// Name fields accept ONLY English/ASCII letters A-Z and a-z.
+// Not allowed: spaces, periods, hyphens, apostrophes, Ñ/ñ,
+// accented letters, or any other Unicode/special characters.
 ["lastName","firstName","middleName","extension"].forEach(id=>{
-  $(id).addEventListener("input", e=>{
-    const start=e.target.selectionStart;
-    const end=e.target.selectionEnd;
-    e.target.value=e.target.value.normalize("NFC");
-    try{e.target.setSelectionRange(start,end)}catch(_){ }
+  const el=$(id);
+  el.addEventListener("input", e=>{
+    const pos=e.target.selectionStart;
+    e.target.value=e.target.value.replace(/[^A-Za-z]/g,"");
+    try{
+      const p=Math.min(pos, e.target.value.length);
+      e.target.setSelectionRange(p,p);
+    }catch(_){}
+  });
+  el.addEventListener("paste", e=>{
+    e.preventDefault();
+    const text=(e.clipboardData||window.clipboardData).getData("text");
+    const clean=text.replace(/[^A-Za-z]/g,"");
+    document.execCommand("insertText",false,clean);
   });
 });
 
