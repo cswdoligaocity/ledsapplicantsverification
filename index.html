@@ -396,11 +396,11 @@ textarea{min-height:85px;resize:vertical}
 <form id="lookupForm">
 <div class="grid">
 
-  <div class="field"><label>Last Name</label><input class="name" id="lastName" required autocomplete="family-name" spellcheck="false" maxlength="100" pattern="[A-Za-z]*" title="English letters A-Z only."></div>
-<div class="field"><label>First Name</label><input class="name" id="firstName" required autocomplete="given-name" spellcheck="false" maxlength="100" pattern="[A-Za-z]*" title="English letters A-Z only."></div>
-<div class="field"><label>Middle Name <span class="opt">(blank if none)</span></label><input class="name" id="middleName" autocomplete="additional-name" spellcheck="false" maxlength="100" pattern="[A-Za-z]*" title="English letters A-Z only."></div>
-<div class="field"><label>Extension <span class="opt">(blank if none)</span></label><input class="name" id="extension" spellcheck="false" maxlength="30" pattern="[A-Za-z]*" title="English letters A-Z only."></div>
-<div class="field full"><div style="font-size:12px;color:#6d7872;background:#f4f8f6;border:1px solid #dce7e1;border-radius:9px;padding:9px 11px"><strong style="color:#07552f">Note:</strong> This form does not accept special characters like spaces, periods (.), hyphens (-), apostrophes ('), and Ñ/ñ. This only accept english letter A-Z.</div></div>
+  <div class="field"><label>Last Name</label><input class="name" id="lastName" required autocomplete="family-name" spellcheck="false" maxlength="100" pattern="[A-Za-z ]*" title="English letters A-Z and spaces only."></div>
+<div class="field"><label>First Name</label><input class="name" id="firstName" required autocomplete="given-name" spellcheck="false" maxlength="100" pattern="[A-Za-z ]*" title="English letters A-Z and spaces only."></div>
+<div class="field"><label>Middle Name <span class="opt">(blank if none)</span></label><input class="name" id="middleName" autocomplete="additional-name" spellcheck="false" maxlength="100" pattern="[A-Za-z ]*" title="English letters A-Z and spaces only."></div>
+<div class="field"><label>Extension <span class="opt">(blank if none)</span></label><input class="name" id="extension" spellcheck="false" maxlength="30" pattern="[A-Za-z ]*" title="English letters A-Z and spaces only."></div>
+<div class="field full"><div style="font-size:12px;color:#6d7872;background:#f4f8f6;border:1px solid #dce7e1;border-radius:9px;padding:9px 11px"><strong style="color:#07552f">Note:</strong> This form does not accept special characters like periods (.), hyphens (-), apostrophes ('), and Ñ/ñ. Spaces are accepted. This only accept English letters A-Z.</div></div>
 <div class="field"><label>Year Level</label><select id="yearLevel" required><option value="">Select year level</option><option value="1ST">1st Year</option><option value="2ND">2nd Year</option><option value="3RD">3rd Year</option><option value="4TH">4th Year</option><option value="5TH">5th Year</option></select></div>
 <div class="field"><label>Barangay</label><select id="barangay" required><option value="">Select barangay</option><option value="ABELLA">ABELLA</option>
 <option value="ALLANG">ALLANG</option>
@@ -552,7 +552,7 @@ const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
 const $=id=>document.getElementById(id);
 let current=null;
 
-// Preserve punctuation and Unicode characters in names (e.g. PEÑA, SANTOS-DELA CRUZ, O'CONNOR).
+// Allow English letters A-Z and spaces only in name fields.
 ["lastName","firstName","middleName","extension"].forEach(id=>{
   $(id).addEventListener("input", e=>{
     const start=e.target.selectionStart;
@@ -650,7 +650,7 @@ document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal()});
 
 <script>
 function allowEnglishLettersOnly(input) {
-  input.value = input.value.replace(/[^A-Za-z]/g, '');
+  input.value = input.value.replace(/[^A-Za-z ]/g, '');
 }
 document.querySelectorAll('.name').forEach(function(input) {
   input.addEventListener('input', function() {
